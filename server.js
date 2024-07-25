@@ -1,3 +1,4 @@
+//@ts-check
 import express from 'express'
 const server = express()
 const port = 3001
@@ -15,7 +16,6 @@ server.use(express.json())
 server.get('/', async (req, res) => {
     const tbl1 = knex.select().from('users')
     res.json(await tbl1)
-
 })
 
 server.post('/', async (req, res) => {
@@ -36,14 +36,12 @@ server.post('/', async (req, res) => {
         res.json('Campos não preenchidos.')
         return
     }
-    /*if((await knex.from('tabela1').select().where("email", user.email).orWhere("num", user.num)).lenght != 0) {
-        res.json('E-mail ou número já existem no cadastro.')
+    const tempVar = await knex.from('users').select().where("email", user.email)
+    if((tempVar).length != 0) {
+        await knex('users').where('id',tempVar[0].id).update({'hobby': user.hobby})
+        res.json(user)
         return
     }
-    if((await knex.from('tabela1').select().where("num", user.num)).lenght != 0) {
-        res.json("Número já cadastrado.")
-        return
-    }*/
     await knex('users').insert(user)
     res.json(user)
 })

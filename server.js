@@ -16,6 +16,11 @@ server.use(express.json())
 
 server.use(cors({origin: "*", credentials: false}))
 
+server.get('/health', (req, res) => {
+    res.status(200)
+    res.json('Ok.')
+})
+
 server.get('/', async (req, res) => {
     const tbl1 = knex.select().from('users')
     res.json(await tbl1)
@@ -28,14 +33,17 @@ server.post('/', async (req, res) => {
         'hobby': req.body.user.hobby
     }
     if(user.name === undefined || user.email === undefined || user.hobby === undefined) {
+        res.status(400)
         res.json('Informações incompletas.')
         return
     }
     if(typeof(user.name) != "string" || typeof(user.email) != "string" || typeof(user.hobby) != "string") {
+        res.status(400)
         res.json('Tipo de variável não suportada.') 
         return
     }
     if(user.name === "" || user.email === "" || user.hobby === "") {
+        res.status(400)
         res.json('Campos não preenchidos.')
         return
     }
@@ -44,6 +52,7 @@ server.post('/', async (req, res) => {
         return re.test(email)
     }
     if(validateEmail(user.email) != true) {
+        res.status(400)
         res.json('Email inválido')
         return
     } 
@@ -64,6 +73,7 @@ server.get('/:id', async (req, res) => {
         res.json(tempVar[0])
         return
     }
+    res.status(404)
     res.json('ID não cadastrada na database.')
 })
 
@@ -71,6 +81,7 @@ server.get('/:id/context', async (req, res) => {
     const userID = req.params.id
     const tempVar = await knex.from('users').select().where("id", userID)
     if(tempVar.length == 0) {
+        res.status(404)
         res.json('ID não cadastrada na database')
         return
     }

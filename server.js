@@ -65,6 +65,9 @@ server.put("/hobby/:id", async (req, res) => {
     hobby: req.body.hobby.name,
     description: req.body.hobby.description,
   };
+  if (await knex.from("hobbies").select().where("hobby", hobby.hobby).first()) {
+    return formatError(res, "Já existe um cadastro para este hobby na database", 409);
+  }
   if (typeof hobby.hobby != "string" || hobby.hobby == "") {
     return formatError(res, "Hobby inválido.", 400);
   }
